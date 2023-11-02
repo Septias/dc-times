@@ -1,5 +1,5 @@
 {
-  description = "Mail Client with TUI written in Rust";
+  description = "Extract times from toggle";
   inputs = {
     rust-overlay.url = "github:oxalica/rust-overlay";
     flake-utils.follows = "rust-overlay/flake-utils";
