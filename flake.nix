@@ -18,7 +18,7 @@
       ];
       nativeBuildInputs = with pkgs; [ pkg-config ];
       rust-toolchain = pkgs.rust-bin.stable.latest.default.override {
-        extensions = [ "rust-src" "rustfmt" "rust-docs" "clippy" ];
+        extensions = [ "rust-src" "rustfmt" "rust-docs" "clippy"];
       };
       LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath buildInputs}";
       CARGO_NET_GIT_FETCH_WITH_CLI = "true";
