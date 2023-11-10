@@ -1,5 +1,6 @@
 extern crate serde_json;
 use chrono::{DateTime, Duration, TimeZone, Utc};
+use dirs::config_dir;
 use inquire::RangeSelect;
 use reqwest::{header::CONTENT_TYPE, Client, Method};
 use serde::{de, Deserialize, Serialize};
@@ -10,6 +11,7 @@ use std::{
 use tokio;
 
 const BASE_URL: &str = "https://api.track.toggl.com/api/v9/";
+const PER_HOUR: f32 = 26.;
 
 #[allow(unused)]
 #[derive(Deserialize, Debug)]
@@ -32,7 +34,7 @@ where
         type Value = Duration;
 
         fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-            formatter.write_str("an i64 which is duration in seconds")
+            formatter.write_str("An i64 which is a duration in seconds")
         }
 
         fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E>
@@ -51,7 +53,7 @@ where
 
 impl Display for TimeEntry {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut date = Utc.ymd(2000, 1, 1).and_hms(0, 0, 0);
+        let mut date = Utc.with_ymd_and_hms(2000, 1, 1, 0, 0, 0).unwrap();
         date += self.duration;
         write!(
             f,
@@ -60,7 +62,7 @@ impl Display for TimeEntry {
             date.format("%H:%M:%S"),
             self.description
                 .as_ref()
-                .unwrap_or(&"no description".to_string())
+                .unwrap_or(&"No description".to_string())
         )
     }
 }
@@ -81,10 +83,9 @@ impl Display for Summary {
         let hours = full_duration.num_seconds() / 60i64.pow(2);
         let minutes = full_duration.num_seconds() % 60i64.pow(2) / 60;
         let seconds = full_duration.num_seconds() % 60i64.pow(2) % 60;
-        let per_hour = 26.;
         let minutes = minutes as f32;
         let hours = hours as f32;
-        let money = (hours * per_hour) + per_hour / 60. * minutes;
+        let money = (hours * PER_HOUR) + PER_HOUR / 60. * minutes;
 
         write!(
             f,
@@ -134,7 +135,9 @@ fn fold_options(elements: &[&TimeEntry]) -> Summary {
 }
 
 fn load_or_ask_api_key() -> Config {
-    match File::open("./api_key.json") {
+    let config_dir = config_dir().expect("Can't create config dir");
+    let file = &config_dir.join("api_key.json");
+    match File::open(file) {
         Ok(reader) => serde_json::from_reader(reader).unwrap(),
         Err(_) => {
             let config = Config::new(
@@ -142,8 +145,8 @@ fn load_or_ask_api_key() -> Config {
                     .prompt()
                     .unwrap(),
             );
-            File::create("./api_key.json").unwrap();
-            fs::write("./api_key.json", serde_json::to_string(&config).unwrap()).unwrap();
+            File::create(file).unwrap();
+            fs::write(file, serde_json::to_string(&config).unwrap()).unwrap();
             config
         }
     }

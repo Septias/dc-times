@@ -13,3 +13,4 @@ serde = {version= "1", features = ["derive"]}
 chrono = {version = "0", features= ["serde"]}
 anyhow = "1.0.62"
 inquire = {git = "https://github.com/Septias/inquire.git"}
+dirs = "*"
