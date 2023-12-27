@@ -20,20 +20,19 @@
       rust-toolchain = pkgs.rust-bin.stable.latest.default.override {
         extensions = [ "rust-src" "rustfmt" "rust-docs" "clippy"];
       };
-      LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath buildInputs}";
-      CARGO_NET_GIT_FETCH_WITH_CLI = "true";
+      name = "dc-times";
     in rec {
       packages = {
-        dc-times = naerskLib.buildPackage {
-          name = "dc-times";
+        ${name} = naerskLib.buildPackage {
+          inherit name;
           src = ./.;
-          inherit buildInputs LD_LIBRARY_PATH CARGO_NET_GIT_FETCH_WITH_CLI;
+          inherit buildInputs;
           nativeBuildInputs = nativeBuildInputs;
         };
-        default = packages.dc-times;
+        default = packages.${name};
       };
       devShells.default = pkgs.mkShell {
-        inherit buildInputs LD_LIBRARY_PATH CARGO_NET_GIT_FETCH_WITH_CLI;
+        inherit buildInputs;
         nativeBuildInputs = nativeBuildInputs ++ [ rust-toolchain pkgs.rust-analyzer ];
         RUST_BACKTRACE = 1;
       };
