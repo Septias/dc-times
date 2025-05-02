@@ -11,7 +11,7 @@ use std::{
 use tokio;
 
 const BASE_URL: &str = "https://api.track.toggl.com/api/v9/";
-const PER_HOUR: f32 = 26.;
+const PER_HOUR: f32 = 30.0;
 
 #[allow(unused)]
 #[derive(Deserialize, Debug)]
